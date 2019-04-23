@@ -22,7 +22,7 @@ def create_dataset_test(path, lang=['en', 'de']):
     print(in_sent)
 
 def tokenize(text, vocab):
-    lang_tokenizer = tf.keras.preprocessing.text.Tokenizer(filters='')
+    lang_tokenizer = tf.keras.preprocessing.text.Tokenizer(filters='', oov_token='<unk>')
 
     lang_tokenizer.word_index = vocab
 
@@ -57,11 +57,12 @@ def load_dataset_test(path):
 def load_vocab(path, lang):
     lines = io.open(path + 'vocab.50K.{}'.format(lang), encoding='UTF-8').read().strip().split('\n')
     vocab = {}
-
+    
+    # 0 is padding
     for idx, word in enumerate(lines):
-        vocab[word] = idx
+        vocab[word] = idx + 1
 
-    vocab['<eos>'] = len(vocab)
+    vocab['<eos>'] = len(vocab) + 1
 
     return vocab
 
