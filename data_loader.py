@@ -11,7 +11,9 @@ def create_dataset(path, limit_size=None):
 
     lines = [line + ' <eos>' for line in tqdm(lines[:limit_size])]
 
-    print(lines[:5])
+    # Print examples
+    for line in lines[:5]:
+        print(line)
 
     return lines 
 
@@ -31,7 +33,7 @@ def tokenize(text, vocab):
 
     return tensor, lang_tokenizer
 
-def load_dataset(path, lang=['en', 'de']):
+def load_dataset(path, limit_size=None, lang=['en', 'de']):
     dataset_train_input_path = 'train.{}'.format(lang[0]) 
     dataset_train_target_path = 'train.{}'.format(lang[1])
 
@@ -39,8 +41,8 @@ def load_dataset(path, lang=['en', 'de']):
     vocab_input = load_vocab(path, lang[0])
     vocab_target = load_vocab(path, lang[1])
     
-    input_text = create_dataset(path + dataset_train_input_path)
-    target_text = create_dataset(path + dataset_train_target_path)
+    input_text = create_dataset(path + dataset_train_input_path, limit_size)
+    target_text = create_dataset(path + dataset_train_target_path, limit_size)
 
     input_tensor, input_lang_tokenizer = tokenize(input_text, vocab_input)
     target_tensor, target_lang_tokenizer = tokenize(target_text, vocab_target)
