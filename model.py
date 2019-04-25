@@ -41,14 +41,14 @@ class Encoder(tf.keras.Model):
 
     def call(self, x, pre_state):
         x = self.embedding(x)
-        x, state_h_1, state_c_1 = self.lstm_1(x, initial_state=pre_state)
-        x, state_h_2, state_c_2 = self.lstm_2(x, initial_state=pre_state)
-        x, state_h_3, state_c_3 = self.lstm_3(x, initial_state=pre_state)
-        output, state_h_4, state_c_4 = self.lstm_4(x, initial_state=pre_state)
+        x, state_h_1, state_c_1 = self.lstm_1(x, initial_state=pre_state[0])
+        x, state_h_2, state_c_2 = self.lstm_2(x, initial_state=pre_state[1])
+        x, state_h_3, state_c_3 = self.lstm_3(x, initial_state=pre_state[2])
+        output, state_h_4, state_c_4 = self.lstm_4(x, initial_state=pre_state[3])
         state = [[state_h_1, state_c_1], [state_h_2, state_c_2], [state_h_3, state_c_3], [state_h_4, state_c_4]]
         return output, state
 
-    def initialize_hidden_state(self, x):
+    def initialize_hidden_state(self):
         return tf.random.uniform((self.batch_size, self.enc_units))
 
     def initialize_cell_state(self):
@@ -87,7 +87,7 @@ class Decoder(tf.keras.Model):
 
         self.W_c = tf.keras.layers.Dense(embedding_dim, activation='tanh')
 
-        self.pred = tf.keras.layers.Dense(vocab_size, activation='softmax')
+        self.W_s = tf.keras.layers.Dense(vocab_size)
 
 
 
@@ -109,9 +109,10 @@ class Decoder(tf.keras.Model):
 
         # h_t shape == (batch_size, embedding_dim)
         h_t = self.W_c(tf.concat([tf.expand_dims(context_vector, 1), dec_output], axis=-1))
+        #h_t = self.W_c(tf.concat([context_vector, tf.squeeze(dec_output)], axis=-1))
 
         # y_t shape == (batch_size, vocab_size)
-        y_t = self.pred(h_t)
+        y_t = tf.squeeze(self.W_s(h_t))
 
         return y_t, state, h_t 
 
@@ -124,24 +125,24 @@ class AttentionLayer(tf.keras.Model):
 
     def call(self, dec_h_t, enc_h_s):
 
-        print('dec_h_t shape:', dec_h_t.shape)
-        print('enc_h_s shape:', enc_h_s.shape)
+#        print('dec_h_t shape:', dec_h_t.shape)
+#        print('enc_h_s shape:', enc_h_s.shape)
         # dec_h_t shape == (batch_size, 1, units)
         # enc_h_s shape == (batch_size, seq_len, units) 
 #        concat_h = tf.concat([dec_h_t, enc_h_s], axis=1)
 #        concat_h = tf.reshape(concat_h, [concat_h.shape[0] * concat_h.shape[1], concat_h.shape[2]])
 #        print('concat_h shape:', concat_h.shape)
         score = self.v_a(tf.nn.tanh(self.W_a(dec_h_t + enc_h_s)))
-        print('score shape:', score.shape)
+#        print('score shape:', score.shape)
 
         # attention_weights shape == (batch_size, seq_len, 1)
         attention_weights = tf.nn.softmax(score, axis=1)
-        print('attention_weights shape:', attention_weights.shape)
+#        print('attention_weights shape:', attention_weights.shape)
 
         # context_vector shape == (batch_size, units)
         context_vector = tf.reduce_sum(tf.matmul(attention_weights, enc_h_s, transpose_a=True), axis=1)
 
-        print('context_vector shape:', context_vector.shape)
+#        print('context_vector shape:', context_vector.shape)
 
         return context_vector
 
