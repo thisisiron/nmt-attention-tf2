@@ -8,6 +8,11 @@ Python == 3.6
 ## Data
 WMT'14 English-German data: https://nlp.stanford.edu/projects/nmt/
 
+Download the datasets using the following script:
+```
+./download.sh
+```
+
 ## Results
 |         | Train Set ACC    | Validation Set ACC    | Test Set ACC |
 |---------|------------------|-----------------------|--------------|
