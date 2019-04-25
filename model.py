@@ -2,17 +2,20 @@
 
 import tensorflow as tf
 
-class Embedder(tf.keras.Model):
-    def __init__(self, vocab_size, embedding_dim):
-        super(Embedder, self).__init__()
-        self.embedding = tf.keras.layers.Embedding(vocab_size, embedding_dim)
-
-    def call(self, input_tensor):
-        return self.embedding(input_tensor)
-
 
 class Encoder(tf.keras.Model):
     def __init__(self, vocab_size, embedding_dim, units, batch_size):
+        """
+        Args:
+            vocab_size:
+            embedding_dim:
+            units:
+            batch_size:
+
+        Returns:
+
+        Raises:
+        """
         super(Encoder, self).__init__()
         self.batch_size = batch_size
         self.enc_units = units
