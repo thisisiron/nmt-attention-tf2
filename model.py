@@ -2,17 +2,14 @@
 
 import tensorflow as tf
 
-
 class Encoder(tf.keras.Model):
     def __init__(self, vocab_size, embedding_dim, units, batch_size):
         """
         Args:
-            vocab_size:
-            embedding_dim:
-            units:
-            batch_size:
-
-        Returns:
+            vocab_size: input language vocabulary
+            embedding_dim: embeddig dimension 
+            units: units 
+            batch_size: batch size
 
         Raises:
         """
@@ -43,6 +40,17 @@ class Encoder(tf.keras.Model):
                                          recurrent_initializer='glorot_uniform')
 
     def call(self, x, pre_state):
+        """
+        Args:
+            x: input tensor
+            pre_state: initial state in LSTM
+
+        Returns:
+            output: 
+            state: hidden state and cell state used for next steps
+
+        Raises:
+        """
         x = self.embedding(x)
         x, state_h_1, state_c_1 = self.lstm_1(x, initial_state=pre_state[0])
         x, state_h_2, state_c_2 = self.lstm_2(x, initial_state=pre_state[1])
@@ -52,7 +60,7 @@ class Encoder(tf.keras.Model):
         return output, state
 
     def initialize_hidden_state(self):
-        return tf.random.uniform((self.batch_size, self.enc_units))
+        return tf.zeros((self.batch_size, self.enc_units))
 
     def initialize_cell_state(self):
         return tf.zeros((self.batch_size, self.enc_units))
@@ -60,6 +68,13 @@ class Encoder(tf.keras.Model):
 
 class Decoder(tf.keras.Model):
     def __init__(self, vocab_size, embedding_dim, units, batch_size):
+        """
+        Args:
+            vocab_size: target language vocabulary
+            embedding_dim: embeddig dimension 
+            units: units 
+            batch_size: batch size
+        """
         super(Decoder, self).__init__()
         self.batch_size = batch_size
         self.dec_units = units
@@ -127,29 +142,29 @@ class AttentionLayer(tf.keras.Model):
         self.v_a = tf.keras.layers.Dense(1)
 
     def call(self, dec_h_t, enc_h_s):
+        """
+        Args:
+            dec_h_t: (batch_size, 1, units)
+            enc_h_s: (batch_size, seq_len, units)
+        
+        Returns:
+            context_vector: (batch_size, units)
+        """
 
-#        print('dec_h_t shape:', dec_h_t.shape)
-#        print('enc_h_s shape:', enc_h_s.shape)
-        # dec_h_t shape == (batch_size, 1, units)
-        # enc_h_s shape == (batch_size, seq_len, units) 
 #        concat_h = tf.concat([dec_h_t, enc_h_s], axis=1)
 #        concat_h = tf.reshape(concat_h, [concat_h.shape[0] * concat_h.shape[1], concat_h.shape[2]])
 #        print('concat_h shape:', concat_h.shape)
+       
+        # score shape == (batch_size, seq_len, 1)
         score = self.v_a(tf.nn.tanh(self.W_a(dec_h_t + enc_h_s)))
-#        print('score shape:', score.shape)
 
         # attention_weights shape == (batch_size, seq_len, 1)
         attention_weights = tf.nn.softmax(score, axis=1)
-#        print('attention_weights shape:', attention_weights.shape)
 
         # context_vector shape == (batch_size, units)
         context_vector = tf.reduce_sum(tf.matmul(attention_weights, enc_h_s, transpose_a=True), axis=1)
 
-#        print('context_vector shape:', context_vector.shape)
-
         return context_vector
-
-        
 
 
 def main():
