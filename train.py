@@ -9,15 +9,94 @@ from sklearn.model_selection import train_test_split
 
 import tensorflow as tf
 
-from data_loader import load_dataset  
+from data_loader import load_dataset, load_vocab, convert_vocab
 from model import Encoder, Decoder, AttentionLayer
+
+def select_optimizer(optimizer, learning_rate):
+    if optimizer == 'adam':
+        return tf.optimizers.Adam(learning_rate)
+    elif optimizer == 'sgd':
+        return tf.optimizers.SGD(learning_rate)
+    elif optimizer == 'rmsprop':
+        return tf.optimizers.RMSprop(learning_rate)
+
+def loss_function(loss_object, y_true, y_pred):
+    mask = tf.math.logical_not(tf.math.equal(y_true, 0))
+    loss = loss_object(y_true, y_pred)
+
+    mask = tf.cast(mask, dtype=loss.dtype)
+    loss *= mask
+
+    return tf.reduce_mean(loss)
 
 def test(args: Namespace):
     cfg = json.load(open(args.config_path, 'r', encoding='UTF-8'))
-#    for key, val in cfg.items():
-#        setattr(cfg, key, val)
-    print(cfg['mode'])
-    pass
+
+    encoder = Encoder(cfg['vocab_input_size'], cfg['embedding_dim'], cfg['units'], 1)
+    decoder = Decoder(cfg['vocab_target_size'], cfg['embedding_dim'], cfg['units'], 1)
+    optimizer = select_optimizer(cfg['optimizer'], cfg['learning_rate']) 
+
+    ckpt = tf.train.Checkpoint(optimizer=optimizer, encoder=encoder, decoder=decoder)
+    manager = tf.train.CheckpointManager(ckpt, cfg['checkpoint_dir'], max_to_keep=3)
+    ckpt.restore(manager.latest_checkpoint)
+
+    sentence = input()
+
+    input_vocab = load_vocab('./data/', 'en')
+    target_vocab = load_vocab('./data/', 'de')
+
+    input_lang_tokenizer = tf.keras.preprocessing.text.Tokenizer(filters='', oov_token='<unk>')
+    input_lang_tokenizer.word_index = input_vocab 
+
+    target_lang_tokenizer = tf.keras.preprocessing.text.Tokenizer(filters='', oov_token='<unk>')
+    target_lang_tokenizer.word_index = target_vocab
+
+    convert_vocab(input_lang_tokenizer, input_vocab)
+    convert_vocab(target_lang_tokenizer, target_vocab)
+
+    inputs = [inp_lang[i] for i in sentence.split(' ')]
+    inputs = tf.keras.preprocessing.sequence.pad_sequences([inputs],
+                                                           maxlen=cfg['max_len_input'],
+                                                           padding='post')
+
+    inputs = tf.convert_to_tensor(inputs)
+
+    result = ''
+
+    enc_hidden = encoder.initialize_hidden_state()
+    enc_cell = encoder.initialize_cell_state()
+    enc_state = [[enc_hidden, enc_cell], [enc_hidden, enc_cell], [enc_hidden, enc_cell], [enc_hidden, enc_cell]]
+
+    enc_output, enc_hidden = encoder(inputs, enc_state)
+
+    dec_hidden = enc_hidden
+    dec_input = tf.expand_dims([targ_lang['<eos>']], 0)
+
+    h_t = tf.zeros((1, 1, cfg['embedding_dim']))
+
+    for t in range(int(cfg['max_len_target'])):
+        predictions, dec_hidden, h_t = decoder(dec_input,
+                                               dec_hidden,
+                                               enc_output,
+                                               h_t)
+
+        # predeictions shape == (1, 50002)
+
+        predicted_id = tf.argmax(predictions[0]).numpy()
+
+        result += target_lang_tokenizer.index_word[predicted_id] + ' '
+
+        if target_lang_tokenizer.index_word[predicted_id] == '<eos>':
+            print('Early stopping')
+            return result, sentence
+
+        dec_input = tf.expand_dims([predicted_id], 0)
+
+    return result, sentence
+
+
+def predict(args: Namespace):
+    cfg = json.load(open(args.config_path, 'r', encoding='UTF-8'))
 
 
 def train(args: Namespace):
@@ -57,23 +136,10 @@ def train(args: Namespace):
     encoder = Encoder(vocab_input_size, embedding_dim, units, BATCH_SIZE)
     decoder = Decoder(vocab_target_size, embedding_dim, units, BATCH_SIZE)
 
-    if args.optimizer == 'adam':
-        optimizer = tf.optimizers.Adam(learning_rate)
-    elif args.optimizer == 'sgd':
-        optimizer = tf.optimizers.SGD(learning_rate)
-    elif args.optimizer == 'rmsprop':
-        optimizer = tf.optimizers.RMSprop(learning_rate)
+    optimizer = select_optimizer(args.optimizer, args.learning_rate)
 
     loss_object = tf.losses.SparseCategoricalCrossentropy(from_logits=True, reduction='none')
 
-    def loss_function(y_true, y_pred):
-        mask = tf.math.logical_not(tf.math.equal(y_true, 0))
-        _loss = loss_object(y_true, y_pred)
-
-        mask = tf.cast(mask, dtype=_loss.dtype)
-        _loss *= mask
-
-        return tf.reduce_mean(_loss)
 
     @tf.function
     def train_step(_input, _target, enc_state):
@@ -91,9 +157,13 @@ def train(args: Namespace):
 
             for idx in range(1, _target.shape[1]):
                 # idx means target character index.
-                predictions, dec_hidden, h_t = decoder(dec_input, dec_hidden, enc_output, h_t)
+                predictions, dec_hidden, h_t = decoder(dec_input, 
+                                                       dec_hidden, 
+                                                       enc_output, 
+                                                       h_t)
 
-                loss += loss_function(_target[:, idx], predictions)
+
+                loss += loss_function(loss_object, _target[:, idx], predictions)
 
                 dec_input = tf.expand_dims(_target[:, idx], 1)
 
@@ -112,6 +182,7 @@ def train(args: Namespace):
     now = time.localtime(time.time())
     now_time = '/{}{}{}{}'.format(now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min)
     checkpoint_dir = './training_checkpoints' + now_time
+    setattr(args, 'checkpoint_dir', checkpoint_dir) 
     checkpoint_prefix = os.path.join(checkpoint_dir, "ckpt")
     checkpoint = tf.train.Checkpoint(optimizer=optimizer,
                                      encoder=encoder,
@@ -121,9 +192,6 @@ def train(args: Namespace):
 
     for epoch in range(EPOCHS):
         start = time.time()
-
-#        if epoch+1 >= 5:
-#            learning_rate /= 2
 
         enc_hidden = encoder.initialize_hidden_state()
         enc_cell = encoder.initialize_cell_state()
