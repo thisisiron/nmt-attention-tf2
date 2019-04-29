@@ -56,7 +56,7 @@ def max_length(tensor):
     
 def load_dataset_test(path):
 
-    it, tt, ilt, tlt =  load_dataset(path, 5000)
+    it, tt, ilt, tlt =  load_dataset(path, 90, 5000)
     print(tt[0].shape)
     print(it.shape, tt.shape)
     max_it, max_tt = max_length(it), max_length(tt)
@@ -73,6 +73,10 @@ def load_vocab(path, lang):
     vocab['<eos>'] = len(vocab) + 1
 
     return vocab
+
+def convert_vocab(tokenizer, vocab):
+    for key, val in vocab.items():
+        tokenizer.index_word[val] = key
 
 def main():
     load_dataset_test(FILE_PATH)
