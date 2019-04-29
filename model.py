@@ -125,12 +125,12 @@ class Decoder(tf.keras.Model):
 
         context_vector = self.attention_layer(dec_output, enc_output)
 
-        # h_t shape == (batch_size, embedding_dim)
+        # h_t shape == (batch_size, 1, embedding_dim)
         h_t = self.W_c(tf.concat([tf.expand_dims(context_vector, 1), dec_output], axis=-1))
         #h_t = self.W_c(tf.concat([context_vector, tf.squeeze(dec_output)], axis=-1))
 
         # y_t shape == (batch_size, vocab_size)
-        y_t = tf.squeeze(self.W_s(h_t))
+        y_t = tf.squeeze(self.W_s(h_t), axis=1)
 
         return y_t, state, h_t 
 
