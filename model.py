@@ -136,16 +136,18 @@ class Decoder(tf.keras.Model):
 
 
 class AttentionLayer(tf.keras.Model):
-    def __init__(self, units):
+    def __init__(self, units, method='concat'):
         super(AttentionLayer, self).__init__()
+        # TODO: Three types of score function
+        self.method = method
         self.W_a = tf.keras.layers.Dense(units)
         self.v_a = tf.keras.layers.Dense(1)
 
     def call(self, dec_h_t, enc_h_s):
         """
         Args:
-            dec_h_t: (batch_size, 1, units)
-            enc_h_s: (batch_size, seq_len, units)
+            dec_h_t: current target state (batch_size, 1, units)
+            enc_h_s: all source states (batch_size, seq_len, units)
         
         Returns:
             context_vector: (batch_size, units)
@@ -154,15 +156,21 @@ class AttentionLayer(tf.keras.Model):
 #        concat_h = tf.concat([dec_h_t, enc_h_s], axis=1)
 #        concat_h = tf.reshape(concat_h, [concat_h.shape[0] * concat_h.shape[1], concat_h.shape[2]])
 #        print('concat_h shape:', concat_h.shape)
-       
-        # score shape == (batch_size, seq_len, 1)
-        score = self.v_a(tf.nn.tanh(self.W_a(dec_h_t + enc_h_s)))
 
-        # attention_weights shape == (batch_size, seq_len, 1)
-        attention_weights = tf.nn.softmax(score, axis=1)
+        if self.method == 'concat':
+            # score shape == (batch_size, seq_len, 1)
+            score = self.v_a(tf.nn.tanh(self.W_a(dec_h_t + enc_h_s)))
 
+        # a_t shape == (batch_size, seq_len, 1)
+        a_t = tf.nn.softmax(score, axis=1)
+
+        # TODO: replace matmul operator with multiply operator
+        # tf.matmul(a_t, enc_h_s, transpose_a=True) -> a_t * enc_h_s
+        # result shape after * operation: (batch_size, seq_len, units)
+
+        # (batch_size, 1, units)
         # context_vector shape == (batch_size, units)
-        context_vector = tf.reduce_sum(tf.matmul(attention_weights, enc_h_s, transpose_a=True), axis=1)
+        context_vector = tf.reduce_sum(tf.matmul(a_t, enc_h_s, transpose_a=True), axis=1)
 
         return context_vector
 

@@ -100,7 +100,7 @@ def predict(args: Namespace):
 
 
 def train(args: Namespace):
-    input_tensor, target_tensor, input_lang_tokenizer, target_lang_tokenizer = load_dataset('./data/', args.max_len, 5000)
+    input_tensor, target_tensor, input_lang_tokenizer, target_lang_tokenizer = load_dataset('./data/', args.max_len)
 
     max_len_input = len(input_tensor[0])
     max_len_target = len(target_tensor[0])
@@ -224,7 +224,7 @@ def train(args: Namespace):
 
         print('\n')
 
-    # saving a information of the model
+    # saving information of the model
     with open('{}/config.json'.format(checkpoint_dir), 'w', encoding='UTF-8') as fout:
         json.dump(vars(args), fout, indent=2, sort_keys=True)
 
