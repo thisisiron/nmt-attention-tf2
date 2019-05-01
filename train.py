@@ -187,6 +187,8 @@ def train(args: Namespace):
     checkpoint = tf.train.Checkpoint(optimizer=optimizer,
                                      encoder=encoder,
                                      decoder=decoder)
+    
+    os.makedirs(checkpoint_dir, exist_ok=True)
 
     # saving information of the model
     with open('{}/config.json'.format(checkpoint_dir), 'w', encoding='UTF-8') as fout:
