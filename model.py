@@ -170,7 +170,7 @@ class AttentionLayer(tf.keras.Model):
 
         # (batch_size, 1, units)
         # context_vector shape == (batch_size, units)
-        context_vector = tf.reduce_sum(tf.matmul(a_t, enc_h_s, transpose_a=True), axis=1)
+        context_vector = tf.reduce_sum(a_t * enc_h_s, axis=1)
 
         return context_vector
 
