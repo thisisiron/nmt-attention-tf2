@@ -187,6 +187,10 @@ def train(args: Namespace):
     checkpoint = tf.train.Checkpoint(optimizer=optimizer,
                                      encoder=encoder,
                                      decoder=decoder)
+
+    # saving information of the model
+    with open('{}/config.json'.format(checkpoint_dir), 'w', encoding='UTF-8') as fout:
+        json.dump(vars(args), fout, indent=2, sort_keys=True)
     
     min_total_loss = 1000
 
@@ -224,9 +228,6 @@ def train(args: Namespace):
 
         print('\n')
 
-    # saving information of the model
-    with open('{}/config.json'.format(checkpoint_dir), 'w', encoding='UTF-8') as fout:
-        json.dump(vars(args), fout, indent=2, sort_keys=True)
 
 
 def main():
