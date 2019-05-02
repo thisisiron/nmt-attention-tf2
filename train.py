@@ -54,7 +54,8 @@ def test(args: Namespace):
     convert_vocab(input_lang_tokenizer, input_vocab)
     convert_vocab(target_lang_tokenizer, target_vocab)
 
-    inputs = [inp_lang[i] for i in sentence.split(' ')]
+
+    inputs = [input_lang_tokenizer.word_index[i] for i in sentence.split(' ')]
     inputs = tf.keras.preprocessing.sequence.pad_sequences([inputs],
                                                            maxlen=cfg['max_len_input'],
                                                            padding='post')
@@ -70,7 +71,8 @@ def test(args: Namespace):
     enc_output, enc_hidden = encoder(inputs, enc_state)
 
     dec_hidden = enc_hidden
-    dec_input = tf.expand_dims([targ_lang['<eos>']], 0)
+    #dec_input = tf.expand_dims([target_lang_tokenizer.word_index['<eos>']], 0)
+    dec_input = tf.expand_dims([target_lang_tokenizer.word_index['<s>']], 0)
 
     h_t = tf.zeros((1, 1, cfg['embedding_dim']))
 
@@ -86,11 +88,16 @@ def test(args: Namespace):
 
         result += target_lang_tokenizer.index_word[predicted_id] + ' '
 
-        if target_lang_tokenizer.index_word[predicted_id] == '<eos>':
+        if target_lang_tokenizer.index_word[predicted_id] == '</s>':
             print('Early stopping')
+            print(result)
+            print(sentence)
             return result, sentence
 
         dec_input = tf.expand_dims([predicted_id], 0)
+
+    print(result)
+    print(sentence)
 
     return result, sentence
 
@@ -150,7 +157,7 @@ def train(args: Namespace):
 
             dec_hidden = enc_state
 
-            dec_input = tf.expand_dims([target_lang_tokenizer.word_index['<eos>']] * BATCH_SIZE, 1)
+            dec_input = tf.expand_dims([target_lang_tokenizer.word_index['<s>']] * BATCH_SIZE, 1)
 
             # First input feeding definition
             h_t = tf.zeros((BATCH_SIZE, 1, embedding_dim))

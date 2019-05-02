@@ -9,7 +9,7 @@ FILE_PATH = './data/'
 def create_dataset(path, limit_size=None):
     lines = io.open(path, encoding='UTF-8').read().strip().split('\n')
 
-    lines = [line for line in tqdm(lines[:limit_size])]
+    lines = ['<s> ' + line  + ' </s>' for line in tqdm(lines[:limit_size])]
 
     # Print examples
     for line in lines[:5]:
@@ -44,7 +44,7 @@ def load_dataset(path, max_len, limit_size=None, lang=['en', 'de']):
     input_text = create_dataset(path + dataset_train_input_path, limit_size)
     target_text = create_dataset(path + dataset_train_target_path,limit_size)
 
-    target_text = [text + ' <eos>' for text in target_text]
+    #target_text = [text + ' <eos>' for text in target_text]
 
     input_tensor, input_lang_tokenizer = tokenize(input_text, vocab_input, max_len)
     target_tensor, target_lang_tokenizer = tokenize(target_text, vocab_target, max_len)
