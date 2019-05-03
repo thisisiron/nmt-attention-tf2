@@ -31,6 +31,8 @@ def main():
                         metavar='STRING', default='adam')
     parser.add_argument('--learning_rate', help='learning_rate <default: 1>', 
                         metavar='INT', type=int, default=0.001)
+    parser.add_argument('--method', help='content-based function <default: concat>', 
+                        metavar='STRING', default='concat')
 
     parser.add_argument('--gpu-num', help='GPU number to use <default: 0>', 
                         metavar='INT', type=int, default=0)

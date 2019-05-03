@@ -67,7 +67,7 @@ class Encoder(tf.keras.Model):
 
 
 class Decoder(tf.keras.Model):
-    def __init__(self, vocab_size, embedding_dim, units, batch_size):
+    def __init__(self, vocab_size, embedding_dim, units, method, batch_size):
         """
         Args:
             vocab_size: target language vocabulary
@@ -101,7 +101,7 @@ class Decoder(tf.keras.Model):
                                          return_state=True,
                                          recurrent_initializer='glorot_uniform')
 
-        self.attention_layer = AttentionLayer(units)
+        self.attention_layer = AttentionLayer(units, method)
 
         self.W_c = tf.keras.layers.Dense(embedding_dim, activation='tanh')
 
@@ -157,9 +157,13 @@ class AttentionLayer(tf.keras.Model):
 #        concat_h = tf.reshape(concat_h, [concat_h.shape[0] * concat_h.shape[1], concat_h.shape[2]])
 #        print('concat_h shape:', concat_h.shape)
 
+        # score shape == (batch_size, seq_len, 1)
         if self.method == 'concat':
-            # score shape == (batch_size, seq_len, 1)
             score = self.v_a(tf.nn.tanh(self.W_a(dec_h_t + enc_h_s)))
+        elif self.method == 'general':
+            score = tf.matmul(self.W_a(enc_h_s), dec_h_t, transpose_b=True)
+        elif self.method == 'dot':
+            score = tf.matmul(enc_h_s, dec_h_t, transpose_b=True) 
 
         # a_t shape == (batch_size, seq_len, 1)
         a_t = tf.nn.softmax(score, axis=1)

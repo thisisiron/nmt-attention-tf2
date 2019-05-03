@@ -124,7 +124,7 @@ def train(args: Namespace):
     print('dataset shape (batch_size, max_len):', dataset)
     
     encoder = Encoder(vocab_input_size, embedding_dim, units, BATCH_SIZE)
-    decoder = Decoder(vocab_target_size, embedding_dim, units, BATCH_SIZE)
+    decoder = Decoder(vocab_target_size, embedding_dim, units, args.method, BATCH_SIZE)
 
     optimizer = select_optimizer(args.optimizer, args.learning_rate)
 
