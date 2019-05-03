@@ -78,6 +78,23 @@ def convert_vocab(tokenizer, vocab):
     for key, val in vocab.items():
         tokenizer.index_word[val] = key
 
+def select_optimizer(optimizer, learning_rate):
+    if optimizer == 'adam':
+        return tf.optimizers.Adam(learning_rate)
+    elif optimizer == 'sgd':
+        return tf.optimizers.SGD(learning_rate)
+    elif optimizer == 'rmsprop':
+        return tf.optimizers.RMSprop(learning_rate)
+
+def loss_function(loss_object, y_true, y_pred):
+    mask = tf.math.logical_not(tf.math.equal(y_true, 0))
+    loss = loss_object(y_true, y_pred)
+
+    mask = tf.cast(mask, dtype=loss.dtype)
+    loss *= mask
+
+    return tf.reduce_mean(loss)
+
 def main():
     load_dataset_test(FILE_PATH)
     pass
