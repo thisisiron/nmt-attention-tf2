@@ -48,7 +48,12 @@ python main.py --max-len 50 --embedding-dim 100 --batch-size 60 --method concat
 
 Test command example
 ```
-python main.py --mode test --config-path training_checkpoints/{TRAINING_CHECKPOINT}
+python main.py --mode test --config-path training_checkpoints/{TRAINING_CHECKPOINT}/config.json
+```
+
+## Demo
+```
+python main.py --mode test --config-path training_checkpoints/Demo/config.json
 ```
 
 ## Results
