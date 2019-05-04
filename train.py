@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import re
 import json
 import time
 
@@ -16,73 +17,81 @@ def test(args: Namespace):
     cfg = json.load(open(args.config_path, 'r', encoding='UTF-8'))
 
     encoder = Encoder(cfg['vocab_input_size'], cfg['embedding_dim'], cfg['units'], 1)
-    decoder = Decoder(cfg['vocab_target_size'], cfg['embedding_dim'], cfg['units'], 1)
+    decoder = Decoder(cfg['vocab_target_size'], cfg['embedding_dim'], cfg['units'], cfg['method'], 1)
     optimizer = select_optimizer(cfg['optimizer'], cfg['learning_rate']) 
 
     ckpt = tf.train.Checkpoint(optimizer=optimizer, encoder=encoder, decoder=decoder)
     manager = tf.train.CheckpointManager(ckpt, cfg['checkpoint_dir'], max_to_keep=3)
     ckpt.restore(manager.latest_checkpoint)
 
-    sentence = input()
+    while True:
+        sentence = input()
 
-    input_vocab = load_vocab('./data/', 'en')
-    target_vocab = load_vocab('./data/', 'de')
+        if sentence.lower() == 'exit': break
 
-    input_lang_tokenizer = tf.keras.preprocessing.text.Tokenizer(filters='', oov_token='<unk>')
-    input_lang_tokenizer.word_index = input_vocab 
+        sentence = re.sub(r"(\.\.\.|[?.!,¿])", r" \1 ", sentence)
+        sentence = re.sub(r'[" "]+', " ", sentence)
 
-    target_lang_tokenizer = tf.keras.preprocessing.text.Tokenizer(filters='', oov_token='<unk>')
-    target_lang_tokenizer.word_index = target_vocab
+        sentence = '<s> ' + sentence.lower().strip() + ' </s>'
 
-    convert_vocab(input_lang_tokenizer, input_vocab)
-    convert_vocab(target_lang_tokenizer, target_vocab)
+        input_vocab = load_vocab('./data/', 'en')
+        target_vocab = load_vocab('./data/', 'de')
+
+        input_lang_tokenizer = tf.keras.preprocessing.text.Tokenizer(filters='', oov_token='<unk>')
+        input_lang_tokenizer.word_index = input_vocab 
+
+        target_lang_tokenizer = tf.keras.preprocessing.text.Tokenizer(filters='', oov_token='<unk>')
+        target_lang_tokenizer.word_index = target_vocab
+
+        convert_vocab(input_lang_tokenizer, input_vocab)
+        convert_vocab(target_lang_tokenizer, target_vocab)
 
 
-    inputs = [input_lang_tokenizer.word_index[i] for i in sentence.split(' ')]
-    inputs = tf.keras.preprocessing.sequence.pad_sequences([inputs],
-                                                           maxlen=cfg['max_len_input'],
-                                                           padding='post')
+        inputs = [input_lang_tokenizer.word_index[i] for i in sentence.split(' ')]
+        inputs = tf.keras.preprocessing.sequence.pad_sequences([inputs],
+                                                               maxlen=cfg['max_len_input'],
+                                                               padding='post')
 
-    inputs = tf.convert_to_tensor(inputs)
+        inputs = tf.convert_to_tensor(inputs)
 
-    result = ''
+        result = ''
 
-    enc_hidden = encoder.initialize_hidden_state()
-    enc_cell = encoder.initialize_cell_state()
-    enc_state = [[enc_hidden, enc_cell], [enc_hidden, enc_cell], [enc_hidden, enc_cell], [enc_hidden, enc_cell]]
+        enc_hidden = encoder.initialize_hidden_state()
+        enc_cell = encoder.initialize_cell_state()
+        enc_state = [[enc_hidden, enc_cell], [enc_hidden, enc_cell], [enc_hidden, enc_cell], [enc_hidden, enc_cell]]
 
-    enc_output, enc_hidden = encoder(inputs, enc_state)
+        enc_output, enc_hidden = encoder(inputs, enc_state)
 
-    dec_hidden = enc_hidden
-    #dec_input = tf.expand_dims([target_lang_tokenizer.word_index['<eos>']], 0)
-    dec_input = tf.expand_dims([target_lang_tokenizer.word_index['<s>']], 0)
+        dec_hidden = enc_hidden
+        #dec_input = tf.expand_dims([target_lang_tokenizer.word_index['<eos>']], 0)
+        dec_input = tf.expand_dims([target_lang_tokenizer.word_index['<s>']], 0)
 
-    h_t = tf.zeros((1, 1, cfg['embedding_dim']))
+        h_t = tf.zeros((1, 1, cfg['embedding_dim']))
 
-    for t in range(int(cfg['max_len_target'])):
-        predictions, dec_hidden, h_t = decoder(dec_input,
-                                               dec_hidden,
-                                               enc_output,
-                                               h_t)
+        for t in range(int(cfg['max_len_target'])):
+            predictions, dec_hidden, h_t = decoder(dec_input,
+                                                   dec_hidden,
+                                                   enc_output,
+                                                   h_t)
 
-        # predeictions shape == (1, 50002)
+            # predeictions shape == (1, 50002)
 
-        predicted_id = tf.argmax(predictions[0]).numpy()
+            predicted_id = tf.argmax(predictions[0]).numpy()
 
-        result += target_lang_tokenizer.index_word[predicted_id] + ' '
+            result += target_lang_tokenizer.index_word[predicted_id] + ' '
 
-        if target_lang_tokenizer.index_word[predicted_id] == '</s>':
-            print('Early stopping')
-            print(result)
-            print(sentence)
-            return result, sentence
+            if target_lang_tokenizer.index_word[predicted_id] == '</s>':
+                print('Early stopping')
+                print(result)
+                print(sentence)
+                return result, sentence
 
-        dec_input = tf.expand_dims([predicted_id], 0)
+            dec_input = tf.expand_dims([predicted_id], 0)
 
-    print(result)
-    print(sentence)
+        print(result)
+        print(sentence)
 
-    return result, sentence
+        return result, sentence
 
 
 def predict(args: Namespace):
