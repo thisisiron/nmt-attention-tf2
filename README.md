@@ -52,6 +52,7 @@ python main.py --mode test --config-path training_checkpoints/{TRAINING_CHECKPOI
 ```
 
 ## Demo
+I think this demo is poor performance because I don't have a large resource. So, The paper proposed embedding dimension sets 1000. But this demo' embedding dimension is 50. 
 ```
 python main.py --mode test --config-path training_checkpoints/Demo/config.json
 ```
