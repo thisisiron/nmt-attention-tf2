@@ -58,9 +58,9 @@ python main.py --mode test --config-path training_checkpoints/Demo/config.json
 ```
 
 ## Results
-|         | Train Set ACC    | Validation Set ACC    | Test Set ACC |
-|---------|------------------|-----------------------|--------------|
-| Model   | --%              | --%                   | --%          |
+|         | Train Set BLEU    || Test Set BLEU |
+|---------|-------------------|----------------|
+| Model   | --                | --             |
 
 ## Reference
 [Effective Approaches to Attention-based Neural Machine Translation](https://arxiv.org/abs/1508.04025?context=cs)<br>
