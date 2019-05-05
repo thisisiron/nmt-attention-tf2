@@ -2,6 +2,7 @@
 
 import os
 import re
+import sys
 import json
 import time
 
@@ -25,9 +26,9 @@ def test(args: Namespace):
     ckpt.restore(manager.latest_checkpoint)
 
     while True:
-        sentence = input()
+        sentence = input('Input Sentence or If you want to quit, type Enter Key : ')
 
-        if sentence.lower() == 'exit': break
+        if sentence == '': break
 
         sentence = re.sub(r"(\.\.\.|[?.!,¿])", r" \1 ", sentence)
         sentence = re.sub(r'[" "]+', " ", sentence)
@@ -47,7 +48,7 @@ def test(args: Namespace):
         convert_vocab(target_lang_tokenizer, target_vocab)
 
 
-        inputs = [input_lang_tokenizer.word_index[i] for i in sentence.split(' ')]
+        inputs = [input_lang_tokenizer.word_index[i] if i in input_lang_tokenizer.word_index else input_lang_tokenizer.word_index['<unk>'] for i in sentence.split(' ')]
         inputs = tf.keras.preprocessing.sequence.pad_sequences([inputs],
                                                                maxlen=cfg['max_len_input'],
                                                                padding='post')
@@ -82,16 +83,13 @@ def test(args: Namespace):
 
             if target_lang_tokenizer.index_word[predicted_id] == '</s>':
                 print('Early stopping')
-                print(result)
-                print(sentence)
-                return result, sentence
+                break
 
             dec_input = tf.expand_dims([predicted_id], 0)
 
         print(result)
         print(sentence)
-
-        return result, sentence
+        sys.stdout.flush()
 
 
 def predict(args: Namespace):
