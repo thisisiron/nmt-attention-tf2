@@ -52,15 +52,25 @@ python main.py --mode test --config-path training_checkpoints/{TRAINING_CHECKPOI
 ```
 
 ## Demo
-I think this demo is poor performance because I don't have a large resource. So, The paper proposed embedding dimension sets 1000. But this demo' embedding dimension is 50. 
+I think this demo is poor performance because I don't have a large resource. So, The paper proposed embedding dimension sets 1000. But this demo's embedding dimension is 50. And this is trained only for 4 epochs.
+
+If you don't have training_checkpoints directory, make training_checkpoints directory and proceed with the next step.
+
+```
+mkdir training_checkpoints
+cd training_checkpoints
+```
+
+You can download [here](https://drive.google.com/open?id=19VtPQ-9gyLkNxRjD7GbjACaTM5xAz_lH). And you put DEMO directory in training_checkpoints directory.
+
 ```
 python main.py --mode test --config-path training_checkpoints/Demo/config.json
 ```
 
 ## Results
-|         | Train Set BLEU    || Test Set BLEU |
-|---------|-------------------|----------------|
-| Model   | --                | --             |
+|         | Train Set BLEU    | Test Set BLEU |
+|---------|-------------------|---------------|
+| Model   | --                | --            |
 
 ## Reference
 [Effective Approaches to Attention-based Neural Machine Translation](https://arxiv.org/abs/1508.04025?context=cs)<br>
