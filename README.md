@@ -64,7 +64,15 @@ cd training_checkpoints
 You can download [here](https://drive.google.com/open?id=19VtPQ-9gyLkNxRjD7GbjACaTM5xAz_lH). And you put DEMO directory in training_checkpoints directory.
 
 ```
-python main.py --mode test --config-path training_checkpoints/Demo/config.json
+python main.py --mode test --config-path training_checkpoints/DEMO/config.json
+```
+
+Example
+```
+Input Sentence or If you want to quit, type Enter Key : Where are you?
+Early stopping
+<s> wo sind sie ? </s> 
+<s> where are you ? </s>
 ```
 
 ## Results
