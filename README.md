@@ -37,7 +37,7 @@ optional arguments:
   --units INT           units <default: 512>
   --dev-split REAL      <default: 0.1>
   --optimizer STRING    optimizer <default: adam>
-  --learning_rate INT   learning_rate <default: 1>
+  --learning_rate REAL   learning_rate <default: 0.001>
   --method STRING       content-based function <default: concat>
 ```
 

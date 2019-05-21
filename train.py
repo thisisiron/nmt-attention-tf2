@@ -87,7 +87,7 @@ def test(args: Namespace):
 
             dec_input = tf.expand_dims([predicted_id], 0)
 
-        print(result)
+        print('<s> ' + result)
         print(sentence)
         sys.stdout.flush()
 
