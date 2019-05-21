@@ -17,8 +17,10 @@ from model import Encoder, Decoder, AttentionLayer
 def test(args: Namespace):
     cfg = json.load(open(args.config_path, 'r', encoding='UTF-8'))
 
-    encoder = Encoder(cfg['vocab_input_size'], cfg['embedding_dim'], cfg['units'], 1)
-    decoder = Decoder(cfg['vocab_target_size'], cfg['embedding_dim'], cfg['units'], cfg['method'], 1)
+    batch_size = 1 # for predicting one sentence.
+
+    encoder = Encoder(cfg['vocab_input_size'], cfg['embedding_dim'], cfg['units'], batch_size, 0)
+    decoder = Decoder(cfg['vocab_target_size'], cfg['embedding_dim'], cfg['units'], cfg['method'], batch_size, 0)
     optimizer = select_optimizer(cfg['optimizer'], cfg['learning_rate']) 
 
     ckpt = tf.train.Checkpoint(optimizer=optimizer, encoder=encoder, decoder=decoder)
@@ -108,8 +110,8 @@ def train(args: Namespace):
 
     # init hyperparameter
     EPOCHS = args.epoch
-    BATCH_SIZE = args.batch_size 
-    steps_per_epoch = len(input_tensor_train) // BATCH_SIZE
+    batch_size = args.batch_size 
+    steps_per_epoch = len(input_tensor_train) // batch_size
     embedding_dim = args.embedding_dim 
     units = args.units 
     vocab_input_size = len(input_lang_tokenizer.word_index) + 1
@@ -126,12 +128,12 @@ def train(args: Namespace):
     setattr(args, 'BUFFER_SIZE', BUFFER_SIZE)
 
     dataset = tf.data.Dataset.from_tensor_slices((input_tensor_train, target_tensor_train)).shuffle(BUFFER_SIZE)
-    dataset = dataset.batch(BATCH_SIZE)
+    dataset = dataset.batch(batch_size)
 
     print('dataset shape (batch_size, max_len):', dataset)
     
-    encoder = Encoder(vocab_input_size, embedding_dim, units, BATCH_SIZE)
-    decoder = Decoder(vocab_target_size, embedding_dim, units, args.method, BATCH_SIZE)
+    encoder = Encoder(vocab_input_size, embedding_dim, units, batch_size, args.dropout)
+    decoder = Decoder(vocab_target_size, embedding_dim, units, args.method, batch_size, args.dropout)
 
     optimizer = select_optimizer(args.optimizer, args.learning_rate)
 
@@ -147,10 +149,10 @@ def train(args: Namespace):
 
             dec_hidden = enc_state
 
-            dec_input = tf.expand_dims([target_lang_tokenizer.word_index['<s>']] * BATCH_SIZE, 1)
+            dec_input = tf.expand_dims([target_lang_tokenizer.word_index['<s>']] * batch_size, 1)
 
             # First input feeding definition
-            h_t = tf.zeros((BATCH_SIZE, 1, embedding_dim))
+            h_t = tf.zeros((batch_size, 1, embedding_dim))
 
             for idx in range(1, _target.shape[1]):
                 # idx means target character index.

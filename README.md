@@ -19,8 +19,8 @@ Download the datasets using the following script:
 usage: main.py [-h] [--mode MODE] [--config-path DIR] [--init-checkpoint FILE]
                [--batch-size INT] [--epoch INT] [--embedding-dim INT]
                [--max-len INT] [--units INT] [--dev-split REAL]
-               [--optimizer STRING] [--learning_rate INT] [--method STRING]
-               [--gpu-num INT]
+               [--optimizer STRING] [--learning-rate REAL] [--dropout REAL]
+               [--method STRING] 
 
 train model from data
 
@@ -37,7 +37,8 @@ optional arguments:
   --units INT           units <default: 512>
   --dev-split REAL      <default: 0.1>
   --optimizer STRING    optimizer <default: adam>
-  --learning_rate REAL   learning_rate <default: 0.001>
+  --learning-rate REAL  learning rate <default: 0.001>
+  --dropout REAL        dropout probability <default: 0>
   --method STRING       content-based function <default: concat>
 ```
 

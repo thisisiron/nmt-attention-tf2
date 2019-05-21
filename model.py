@@ -3,7 +3,7 @@
 import tensorflow as tf
 
 class Encoder(tf.keras.Model):
-    def __init__(self, vocab_size, embedding_dim, units, batch_size):
+    def __init__(self, vocab_size, embedding_dim, units, batch_size, dropout):
         """
         Args:
             vocab_size: input language vocabulary
@@ -22,21 +22,25 @@ class Encoder(tf.keras.Model):
         self.lstm_1 = tf.keras.layers.LSTM(self.enc_units,
                                          return_sequences=True,
                                          return_state=True,
+                                         dropout=dropout,
                                          recurrent_initializer='glorot_uniform')
 
         self.lstm_2 = tf.keras.layers.LSTM(self.enc_units,
                                          return_sequences=True,
                                          return_state=True,
+                                         dropout=dropout,
                                          recurrent_initializer='glorot_uniform')
 
         self.lstm_3 = tf.keras.layers.LSTM(self.enc_units,
                                          return_sequences=True,
                                          return_state=True,
+                                         dropout=dropout,
                                          recurrent_initializer='glorot_uniform')
 
         self.lstm_4 = tf.keras.layers.LSTM(self.enc_units,
                                          return_sequences=True,
                                          return_state=True,
+                                         dropout=dropout,
                                          recurrent_initializer='glorot_uniform')
 
     def call(self, x, pre_state):
@@ -67,7 +71,7 @@ class Encoder(tf.keras.Model):
 
 
 class Decoder(tf.keras.Model):
-    def __init__(self, vocab_size, embedding_dim, units, method, batch_size):
+    def __init__(self, vocab_size, embedding_dim, units, method, batch_size, dropout):
         """
         Args:
             vocab_size: target language vocabulary
@@ -84,21 +88,25 @@ class Decoder(tf.keras.Model):
         self.lstm_1 = tf.keras.layers.LSTM(self.dec_units,
                                          return_sequences=True,
                                          return_state=True,
+                                         dropout=dropout,
                                          recurrent_initializer='glorot_uniform')
         
         self.lstm_2 = tf.keras.layers.LSTM(self.dec_units,
                                          return_sequences=True,
                                          return_state=True,
+                                         dropout=dropout,
                                          recurrent_initializer='glorot_uniform')
 
         self.lstm_3 = tf.keras.layers.LSTM(self.dec_units,
                                          return_sequences=True,
                                          return_state=True,
+                                         dropout=dropout,
                                          recurrent_initializer='glorot_uniform')
 
         self.lstm_4 = tf.keras.layers.LSTM(self.dec_units,
                                          return_sequences=True,
                                          return_state=True,
+                                         dropout=dropout,
                                          recurrent_initializer='glorot_uniform')
 
         self.attention_layer = AttentionLayer(units, method)
