@@ -47,9 +47,6 @@ def load_dataset(path, max_len, limit_size=None, lang=['en', 'de']):
     input_text = create_dataset(path + dataset_train_input_path, limit_size)
     target_text = create_dataset(path + dataset_train_target_path,limit_size)
 
-#    input_text = ['<s> ' + text + ' </s>' for text in target_text]
-#    target_text = [text + ' </s>' for text in target_text]
-
     input_tensor, input_lang_tokenizer = tokenize(input_text, vocab_input, max_len)
     target_tensor, target_lang_tokenizer = tokenize(target_text, vocab_target, max_len)
 
