@@ -29,8 +29,10 @@ def main():
                         type=float, default=0.1)
     parser.add_argument('--optimizer', help='optimizer <default: adam>', 
                         metavar='STRING', default='adam')
-    parser.add_argument('--learning_rate', help='learning_rate <default: 1>', 
-                        metavar='INT', type=int, default=0.001)
+    parser.add_argument('--learning-rate', help='learning rate <default: 0.001>', 
+                        metavar='REAL', type=float, default=0.001)
+    parser.add_argument('--dropout', help='dropout probability <default: 0>', 
+                        metavar='REAL', type=float, default=.0)
     parser.add_argument('--method', help='content-based function <default: concat>', 
                         metavar='STRING', default='concat')
 

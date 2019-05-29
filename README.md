@@ -19,8 +19,8 @@ Download the datasets using the following script:
 usage: main.py [-h] [--mode MODE] [--config-path DIR] [--init-checkpoint FILE]
                [--batch-size INT] [--epoch INT] [--embedding-dim INT]
                [--max-len INT] [--units INT] [--dev-split REAL]
-               [--optimizer STRING] [--learning_rate INT] [--method STRING]
-               [--gpu-num INT]
+               [--optimizer STRING] [--learning-rate REAL] [--dropout REAL]
+               [--method STRING] 
 
 train model from data
 
@@ -37,7 +37,8 @@ optional arguments:
   --units INT           units <default: 512>
   --dev-split REAL      <default: 0.1>
   --optimizer STRING    optimizer <default: adam>
-  --learning_rate INT   learning_rate <default: 1>
+  --learning-rate REAL  learning rate <default: 0.001>
+  --dropout REAL        dropout probability <default: 0>
   --method STRING       content-based function <default: concat>
 ```
 
@@ -64,7 +65,15 @@ cd training_checkpoints
 You can download [here](https://drive.google.com/open?id=19VtPQ-9gyLkNxRjD7GbjACaTM5xAz_lH). And you put DEMO directory in training_checkpoints directory.
 
 ```
-python main.py --mode test --config-path training_checkpoints/Demo/config.json
+python main.py --mode test --config-path training_checkpoints/DEMO/config.json
+```
+
+Example
+```
+Input Sentence or If you want to quit, type Enter Key : Where are you?
+Early stopping
+<s> wo sind sie ? </s> 
+<s> where are you ? </s>
 ```
 
 ## Results
