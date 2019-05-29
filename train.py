@@ -4,6 +4,7 @@ import os
 import re
 import sys
 import json
+import datetime as dt
 import time
 
 from argparse import ArgumentParser, Namespace
@@ -67,9 +68,11 @@ def test(args: Namespace):
 
         dec_hidden = enc_hidden
         #dec_input = tf.expand_dims([target_lang_tokenizer.word_index['<eos>']], 0)
-        dec_input = tf.expand_dims([target_lang_tokenizer.word_index['<s>']], 0)
+        dec_input = tf.expand_dims([target_lang_tokenizer.word_index['<s>']], 1)
 
-        h_t = tf.zeros((1, 1, cfg['embedding_dim']))
+        print('dec_input:', dec_input)
+
+        h_t = tf.zeros((batch_size, 1, cfg['embedding_dim']))
 
         for t in range(int(cfg['max_len_target'])):
             predictions, dec_hidden, h_t = decoder(dec_input,
@@ -80,6 +83,7 @@ def test(args: Namespace):
             # predeictions shape == (1, 50002)
 
             predicted_id = tf.argmax(predictions[0]).numpy()
+            print('predicted_id', predicted_id)
 
             result += target_lang_tokenizer.index_word[predicted_id] + ' '
 
@@ -87,7 +91,8 @@ def test(args: Namespace):
                 print('Early stopping')
                 break
 
-            dec_input = tf.expand_dims([predicted_id], 0)
+            dec_input = tf.expand_dims([predicted_id], 1)
+            print('dec_input:', dec_input)
 
         print('<s> ' + result)
         print(sentence)
@@ -179,9 +184,8 @@ def train(args: Namespace):
 
 
     # Setting checkpoint
-    now = time.localtime(time.time())
-    now_time = '/{}{}{}{}'.format(now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min)
-    checkpoint_dir = './training_checkpoints' + now_time
+    now_time = dt.datetime.now().strftime("%m%d%H%M")
+    checkpoint_dir = './training_checkpoints/' + now_time
     setattr(args, 'checkpoint_dir', checkpoint_dir) 
     checkpoint_prefix = os.path.join(checkpoint_dir, "ckpt")
     checkpoint = tf.train.Checkpoint(optimizer=optimizer,
