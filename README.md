@@ -72,8 +72,8 @@ Example
 ```
 Input Sentence or If you want to quit, type Enter Key : Where are you?
 Early stopping
-<s> wo sind sie ? </s> 
-<s> where are you ? </s>
+<s> was ist ihr name ? </s> 
+<s> what is your name ? </s>
 ```
 
 ## Results
