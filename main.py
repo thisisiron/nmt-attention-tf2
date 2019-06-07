@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from argparse import ArgumentParser, Namespace
-from train import train, test
+from run import train, test
 
 def main():
 

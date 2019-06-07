@@ -70,7 +70,7 @@ python main.py --mode test --config-path training_checkpoints/DEMO/config.json
 
 Example
 ```
-Input Sentence or If you want to quit, type Enter Key : Where are you?
+Input Sentence or If you want to quit, type Enter Key : What is your name?
 Early stopping
 <s> was ist ihr name ? </s> 
 <s> what is your name ? </s>
