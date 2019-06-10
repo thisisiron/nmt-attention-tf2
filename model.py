@@ -161,9 +161,9 @@ class AttentionLayer(tf.keras.Model):
             context_vector: (batch_size, units)
         """
 
-#        concat_h = tf.concat([dec_h_t, enc_h_s], axis=1)
-#        concat_h = tf.reshape(concat_h, [concat_h.shape[0] * concat_h.shape[1], concat_h.shape[2]])
-#        print('concat_h shape:', concat_h.shape)
+        # concat_h = tf.concat([dec_h_t, enc_h_s], axis=1)
+        # concat_h = tf.reshape(concat_h, [concat_h.shape[0] * concat_h.shape[1], concat_h.shape[2]])
+        # print('concat_h shape:', concat_h.shape)
 
         # score shape == (batch_size, seq_len, 1)
         if self.method == 'concat':
