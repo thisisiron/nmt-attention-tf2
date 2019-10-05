@@ -2,8 +2,7 @@
 Effective Approaches to Attention-based Neural Machine Translation implemented as Tensorflow 2.0
 
 ## Requirements
-Tensorflow == 2.0_alpha <br>
-Python == 3.6
+Tensorflow 2.0<br>
 
 ## Data
 WMT'14 English-German data: https://nlp.stanford.edu/projects/nmt/
