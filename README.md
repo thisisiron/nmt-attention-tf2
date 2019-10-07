@@ -1,4 +1,4 @@
-# nmt-attention-tf
+# nmt-attention-tf2
 Effective Approaches to Attention-based Neural Machine Translation implemented as Tensorflow 2.0
 
 ## Requirements
